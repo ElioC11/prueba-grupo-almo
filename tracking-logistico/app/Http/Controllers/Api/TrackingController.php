@@ -20,7 +20,7 @@ class TrackingController extends Controller
 
         if (!$shipment) {
             return response()->json([
-                'message' => 'Tracking number not found'
+                'message' => 'Número de guía no encontrado, porfavor ingresalo nuevamente'
             ], 404);
         }
 

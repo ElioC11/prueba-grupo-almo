@@ -29,13 +29,11 @@
         </form>
 
         @if($shipment)
-            <x-filament-panels::section>
-                <x-slot name="heading">
-                    Historial del Envío: {{ $shipment->tracking_number }}
-                </x-slot>
+            <div class="bg-white dark:bg-gray-800 shadow rounded-lg p-4">
+                <h2 class="text-lg font-semibold text-gray-900 dark:text-white mb-3">Historial del Envío: {{ $shipment->tracking_number }}</h2>
 
                 @if($shipment->histories->isEmpty())
-                    <p>No hay historial registrado para este envío.</p>
+                    <p class="text-sm text-gray-700 dark:text-gray-300">No hay historial registrado para este envío.</p>
                 @else
                     <div class="overflow-x-auto">
                         <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
@@ -60,7 +58,7 @@
                         </table>
                     </div>
                 @endif
-            </x-filament-panels::section>
+            </div>
         @endif
     </div>
 </x-filament-panels::page>

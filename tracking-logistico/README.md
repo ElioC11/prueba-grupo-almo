@@ -1,59 +1,90 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+﻿# Tracking Logístico
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+## Descripción
+Sistema de seguimiento de envíos logísticos desarrollado en Laravel con Filament. Permite buscar envíos por número de guía (tracking_number) y visualizar su historial completo de estados y ubicaciones. Incluye una interfaz de administración para gestionar envíos y un endpoint API para consultas externas.
 
-## About Laravel
+## Requisitos
+- PHP 8.1 o superior
+- Composer
+- Node.js 20+ (para compilar assets)
+- MySQL o base de datos compatible
+- XAMPP o servidor web con PHP
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+## Instalación
+1. Clona o descarga el proyecto en tu servidor web (ej. XAMPP htdocs).
+2. Instala dependencias de PHP: `composer install`
+3. Copia .env.example a .env y configura la base de datos.
+4. Genera clave: `php artisan key:generate`
+5. Ejecuta migraciones: `php artisan migrate`
+6. Instala dependencias de Node: `npm install`
+7. Compila assets: `npm run build`
+8. Opcional: Ejecuta seeders para datos de prueba: `php artisan db:seed`
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+## Configuración
+- Base de datos: Configura en .env las credenciales de MySQL.
+- Servidor: Ejecuta `php artisan serve` para desarrollo local.
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+## Estructura de la Base de Datos
+El sistema utiliza las siguientes tablas principales:
 
-## Learning Laravel
+- **users**: Usuarios del sistema (estándar Laravel).
+- **locations**: Ubicaciones físicas donde ocurren eventos de envío (ej. Bodega Central, Sucursal Norte).
+- **shipment_statuses**: Estados posibles de un envío (ej. Recibido, En tránsito, Entregado).
+- **shipments**: Información principal de cada envío, incluyendo:
+  - tracking_number: Número de guía único (string).
+  - employee_name: Nombre del empleado responsable (string).
+  - status_id: ID del estado actual (relación con shipment_statuses).
+  - current_location_id: ID de la ubicación actual (relación con locations).
+- **shipment_histories**: Historial de cambios de cada envío, con:
+  - shipment_id: ID del envío (relación con shipments).
+  - status_id: ID del estado en ese momento (relación con shipment_statuses).
+  - location_id: ID de la ubicación en ese momento (relación con locations).
+  - comments: Comentarios opcionales sobre el evento (text).
+  - created_at: Fecha y hora del evento.
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework. You can also check out [Laravel Learn](https://laravel.com/learn), where you will be guided through building a modern Laravel application.
+Las relaciones permiten rastrear el historial completo de cada envío desde su creación hasta entrega, mostrando cómo cambia de estado y ubicación a lo largo del tiempo.
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+## Uso
+Accede al panel de administración en `http://localhost:8000/admin` (ajusta el puerto si es diferente).
 
-## Laravel Sponsors
+### Funciones Disponibles
+- **Lista de Envíos**: Ver todos los envíos con búsqueda por tracking_number o employee_name.
+- **Buscar Envío Específico**: Página dedicada (`/admin/search-shipment-page`) para ingresar un número de guía y ver su historial completo en una tabla.
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+## Endpoint API para Solicitar Información
+El sistema incluye un endpoint REST API para consultas externas:
 
-### Premium Partners
-
-- **[Vehikl](https://vehikl.com)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Redberry](https://redberry.international/laravel-development)**
-- **[Active Logic](https://activelogic.com)**
-
-## Contributing
-
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
-
-## Code of Conduct
-
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
-
-## Security Vulnerabilities
-
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
-
-## License
-
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+- **URL**: `GET /api/tracking/{tracking_number}`
+- **Descripción**: Devuelve información detallada de un envío específico en formato JSON.
+- **Parámetros**:
+  - `tracking_number`: Número de guía del envío (string, requerido en la URL).
+- **Respuesta Exitosa (200)**:
+  ```json
+  {
+    "tracking_number": "ABC123456",
+    "status": "En tránsito",
+    "current_location": "Sucursal Norte",
+    "recipient_employee": "Juan Pérez",
+    "history": [
+      {
+        "date": "2026-03-31T10:00:00Z",
+        "location": "Bodega Central",
+        "status": "Recibido",
+        "comments": "Paquete recibido en bodega"
+      },
+      {
+        "date": "2026-03-31T14:00:00Z",
+        "location": "Sucursal Norte",
+        "status": "En tránsito",
+        "comments": "Enviado a sucursal"
+      }
+    ]
+  }
+  ```
+- **Respuesta de Error (404)**:
+  ```json
+  {
+    "message": "Numero de seguimiento no encontrado, porfavor ingresalo nuevamente"
+  }
+  ```
+- **Uso**: Realiza una petición GET a `http://tu-dominio/api/tracking/ABC123456` para obtener el historial del envío con guía ABC123456. Útil para integraciones con otros sistemas o consultas programáticas.
